@@ -25,6 +25,8 @@ def get_face_swapper() -> Any:
             # Get the project root directory (where app.py is located)
             project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
             model_path = os.path.join(project_root, 'models', 'inswapper_128.onnx')
+            print(f"[DEBUG] Loading model from: {model_path}")
+            print(f"[DEBUG] Model exists: {os.path.exists(model_path)}")
             FACE_SWAPPER = insightface.model_zoo.get_model(model_path, providers=roop.globals.execution_providers)
     return FACE_SWAPPER
 
@@ -39,6 +41,9 @@ def pre_check() -> bool:
     # Get the project root directory (where app.py is located)
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
     download_directory_path = os.path.join(project_root, 'models')
+    print(f"[DEBUG] face_swapper.py location: {__file__}")
+    print(f"[DEBUG] Project root: {project_root}")
+    print(f"[DEBUG] Download directory: {download_directory_path}")
     conditional_download(download_directory_path, ['https://huggingface.co/CountFloyd/deepfake/resolve/main/inswapper_128.onnx'])
     return True
 
