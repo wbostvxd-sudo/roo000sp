@@ -2,6 +2,7 @@ from typing import Any, List, Callable
 import cv2
 import insightface
 import threading
+import os
 
 import roop.globals
 import roop.processors.frame.core
@@ -21,7 +22,9 @@ def get_face_swapper() -> Any:
 
     with THREAD_LOCK:
         if FACE_SWAPPER is None:
-            model_path = resolve_relative_path('../models/inswapper_128.onnx')
+            # Get the project root directory (where app.py is located)
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+            model_path = os.path.join(project_root, 'models', 'inswapper_128.onnx')
             FACE_SWAPPER = insightface.model_zoo.get_model(model_path, providers=roop.globals.execution_providers)
     return FACE_SWAPPER
 
@@ -33,9 +36,12 @@ def clear_face_swapper() -> None:
 
 
 def pre_check() -> bool:
-    download_directory_path = resolve_relative_path('../models')
+    # Get the project root directory (where app.py is located)
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+    download_directory_path = os.path.join(project_root, 'models')
     conditional_download(download_directory_path, ['https://huggingface.co/CountFloyd/deepfake/resolve/main/inswapper_128.onnx'])
     return True
+
 
 
 def pre_start() -> bool:
