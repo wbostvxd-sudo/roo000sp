@@ -82,8 +82,9 @@ def process_media(
         if predict_image(roop.globals.target_path):
             return "NSFW detected"
         shutil.copy2(roop.globals.target_path, roop.globals.output_path)
-        # process frame
+        # process frame - each processor works on the output of the previous one
         for frame_processor in get_frame_processors_modules(roop.globals.frame_processors):
+            # Read the current state (either original or processed by previous processor)
             frame_processor.process_image(roop.globals.source_path, roop.globals.output_path, roop.globals.output_path)
             frame_processor.post_process()
         return roop.globals.output_path
@@ -101,11 +102,16 @@ def process_media(
     else:
         extract_frames(roop.globals.target_path)
     
-    # process frame
+    # process frame - IMPORTANT: processors must run sequentially on the same frames
+    # First processor (face_swapper) swaps faces, second processor (face_enhancer) enhances them
     temp_frame_paths = get_temp_frame_paths(roop.globals.target_path)
     if temp_frame_paths:
         for frame_processor in get_frame_processors_modules(roop.globals.frame_processors):
+            print(f"[PROCESSING] Running {frame_processor.__name__} on {len(temp_frame_paths)} frames")
             frame_processor.process_video(roop.globals.source_path, temp_frame_paths)
+            # Don't call post_process here - wait until all processors finish
+        # Now call post_process for all processors
+        for frame_processor in get_frame_processors_modules(roop.globals.frame_processors):
             frame_processor.post_process()
     else:
         return "Frames not found"
