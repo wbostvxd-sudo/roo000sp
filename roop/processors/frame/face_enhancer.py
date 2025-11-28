@@ -23,7 +23,13 @@ def get_face_enhancer() -> Any:
         if FACE_ENHANCER is None:
             model_path = resolve_relative_path('../models/GFPGANv1.4.pth')
             # todo: set models path -> https://github.com/TencentARC/GFPGAN/issues/399
-            FACE_ENHANCER = GFPGANer(model_path=model_path, upscale=1, device=get_device())
+            print(f"[ROOP.FACE-ENHANCER] Loading model from: {model_path}")
+            try:
+                FACE_ENHANCER = GFPGANer(model_path=model_path, upscale=1, device=get_device())
+                print(f"[ROOP.FACE-ENHANCER] Model loaded successfully")
+            except Exception as e:
+                print(f"[ROOP.FACE-ENHANCER] Error loading model: {e}")
+                FACE_ENHANCER = None
     return FACE_ENHANCER
 
 
@@ -44,6 +50,7 @@ def clear_face_enhancer() -> None:
 def pre_check() -> bool:
     download_directory_path = resolve_relative_path('../models')
     conditional_download(download_directory_path, ['https://github.com/TencentARC/GFPGAN/releases/download/v1.3.4/GFPGANv1.4.pth'])
+    print(f"[ROOP.FACE-ENHANCER] pre_check complete. Model path: {download_directory_path}")
     return True
 
 
@@ -80,8 +87,11 @@ def enhance_face(target_face: Face, temp_frame: Frame) -> Frame:
 def process_frame(source_face: Face, reference_face: Face, temp_frame: Frame) -> Frame:
     many_faces = get_many_faces(temp_frame)
     if many_faces:
+        print(f"[ROOP.FACE-ENHANCER] Found {len(many_faces)} faces to enhance")
         for target_face in many_faces:
             temp_frame = enhance_face(target_face, temp_frame)
+    else:
+        print(f"[ROOP.FACE-ENHANCER] No faces found to enhance")
     return temp_frame
 
 
