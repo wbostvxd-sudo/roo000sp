@@ -22,13 +22,21 @@ def get_face_enhancer() -> Any:
     with THREAD_LOCK:
         if FACE_ENHANCER is None:
             model_path = resolve_relative_path('../models/GFPGANv1.4.pth')
-            # todo: set models path -> https://github.com/TencentARC/GFPGAN/issues/399
             print(f"[ROOP.FACE-ENHANCER] Loading model from: {model_path}")
             try:
-                FACE_ENHANCER = GFPGANer(model_path=model_path, upscale=1, device=get_device())
-                print(f"[ROOP.FACE-ENHANCER] Model loaded successfully")
+                FACE_ENHANCER = GFPGANer(
+                    model_path=model_path,
+                    upscale=1,
+                    arch='clean',
+                    channel_multiplier=2,
+                    bg_upsampler=None,
+                    device=get_device()
+                )
+                print(f"[ROOP.FACE-ENHANCER] Model loaded successfully on {get_device()}")
             except Exception as e:
                 print(f"[ROOP.FACE-ENHANCER] Error loading model: {e}")
+                import traceback
+                traceback.print_exc()
                 FACE_ENHANCER = None
     return FACE_ENHANCER
 
